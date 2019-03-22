@@ -1,2 +1,0 @@
-# Clopez
-Tarea#3
