@@ -367,98 +367,6 @@ h1 {
   color: #657b83;
 }
 
-/*css de editor*/
-$controls-color: #ADB5B9;
-$border-color: #C2CACF;
-
-* {
-  box-sizing: border-box;
-}
-
-.wysiwyg-editor {
-  display: block;
-  width: 400px;
-  margin: 100px auto 0;
-}
-
-.wysiwyg-controls {
-  display: block;
-  width: 100%;
-  height: 35px;
-  border: 1px solid $border-color;
-  border-bottom: none;
-  border-radius: 3px 3px 0 0;
-  background: #fff;
-  
-  a {
-    display: inline-block;
-    width: 35px;
-    height: 35px;
-    vertical-align: top;
-    line-height: 38px;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    color: $controls-color;
-  }
-  [data-role="bold"] {
-    font-weight: bold;
-  }
-  [data-role="italic"] {
-    font-style: italic;
-  }
-  [data-role="underline"] {
-    text-decoration: underline;
-  }
-}
-
-[class^="menu"] {
-  position: relative;
-  top: 48%;
-  
-  display: block;
-  width: 65%;
-  height: 2px;
-  margin: 0 auto;
-  background: $controls-color;
-  
-  &:before {
-    @extend [class^="menu"];
-    content: '';
-    top: -5px;
-    width: 80%;
-  }
-  &:after {
-    @extend [class^="menu"];
-    content: '';
-    top: 3px;
-    width: 80%;
-  }
-}
-.menu-left {
-  &:before, &:after {
-    margin-right: 4px;
-  }
-}
-.menu-right {
-  &:before, &:after {
-    margin-left: 4px;
-  }
-}
-
-.wysiwyg-content {
-  max-width: 100%;
-  width: 100%;
-  height: auto;
-  padding: 12px;
-  resize: both;
-  overflow: auto;
-  font-family: Helvetica, sans-serif;
-  font-size: 12px;
-  border: 1px solid $border-color;
-  border-radius: 0 0 3px 3px;
-  background: #F2F4F6;
-}
 
 
 
@@ -1442,27 +1350,7 @@ $border-color: #C2CACF;
 	</section>
 
 
-<div class="col-md-12">
-	<div class="col-sm-6">
-		<div class="wysiwyg-editor">
-  <div class="wysiwyg-controls">
-    <a href='#' data-role='bold'>B</a>
-    <a href='#' data-role='italic'>I</a>
-    <a href='#' data-role='underline'>U</a>
-    <a href='#' data-role='justifyleft'><i class="menu-left"></i></a>
-    <a href='#' data-role='justifycenter'><i class="menu-center"></i></a>
-    <a href='#' data-role='justifyright'><i class="menu-right"></i></a>
-  </div>
-  <div class="wysiwyg-content" contenteditable>
-    <b>Let's make a statement!</b>
-    <br>
-    <i>This is an italicised sentence.</i>
-    <br>
-    <u>Very important information.</u>
-  </div>
-</div>
-	</div>
-</div>
+
 
 
 	
@@ -1627,21 +1515,13 @@ $border-color: #C2CACF;
 	<!--<script src="js/snack.js"></script>-->
 
 	<script>
-		
-    /*
-source: https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla#Executing_Commands
-        https://developer.mozilla.org/en-US/docs/Web/API/document.execCommand
-*/
-
-$('.wysiwyg-controls a').on('click', function(e) {
-  
-  e.preventDefault();
-  document.execCommand($(this).data('role'), false);
-});
+		//css de editor
+		var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.getSession().setMode("ace/mode/javascript");
+    document.getElementById('editor').style.fontSize='16px';
 
 	</script>
-
-
 	</body>
 </html>
 
