@@ -1,0 +1,267 @@
+@import url(https://cdn.rawgit.com/tonsky/FiraCode/1.205/distr/fira_code.css);
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  min-height: 100vh;
+}
+
+section.editor {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+section.footer {
+  background-color: #181a1b;
+  flex: 0;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #333;
+}
+section.footer > div {
+  display: flex;
+}
+section.footer > div > div {
+  padding: 8px;
+  color: #ccc;
+  font-size: 12px;
+}
+section.footer .footer-right > div {
+  margin: 0 12px;
+}
+
+aside {
+    background-color: #1d1f21;
+    color: #a2a3a5;
+    flex: -1 0 300px;
+    padding: 8px;
+}
+aside .aside-block {
+  margin-bottom: 24px;
+  overflow-x: hidden;
+}
+aside label {
+  padding: 2px;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+}
+aside .open-file,
+aside .sidebar-item {
+  cursor: default;
+  padding: 8px 8px 8px 16px;
+  font-size: 13px;
+}
+aside .open-file.p1,
+aside .sidebar-item.p1 {
+  padding-left: 48px;
+}
+aside .open-file.p2,
+aside .sidebar-item.p2 {
+  padding-left: 80px;
+}
+aside .folder {
+  position: relative;
+  font-weight: bold;
+}
+aside .folder:before {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: -4px;
+  margin-left: 4px;
+  content: "";
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent #888;
+  border-style: solid;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0.5;
+}
+aside .folder.open::before {
+  transform: rotate(90deg);
+}
+aside .folder.p1:before {
+  left: 32px;
+}
+aside .folder.p2:before {
+  left: 64px;
+}
+aside .aside-block:hover .folder::before {
+  opacity: 1;
+}
+aside .open-file {
+  padding-left: 0;
+  cursor: pointer;
+}
+aside .open-file span {
+  opacity: 0.6;
+}
+aside .open-file:hover {
+  color: #fff;
+}
+aside .open-file.active {
+  color: #ca0;
+  opacity: 1;
+}
+aside .open-file.active:hover {
+  color: #db4;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+menu.tabs {
+  background-color: #1d1f21;
+  padding: 2px 0 0;
+  margin: 0;
+  flex: 0 0 auto;
+  display: flex;
+  font-size: 12px;
+}
+menu.tabs a {
+  padding: 6px 32px 12px;
+  color: #aaa;
+  opacity: 1;
+  text-decoration: none;
+  border-top: 4px solid transparent;
+  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #292c2e;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  min-width: 150px;
+  cursor: default;
+  clip-path: polygon(10% 0, 90% 0%, 100% 100%, 0 100%);
+  margin-right: -10px;
+}
+menu.tabs a span {
+  font-weight: bold;
+  padding-left: 12px;
+}
+menu.tabs a:hover {
+  color: #fff;
+}
+menu.tabs a.active {
+  opacity: 1;
+  border-top-color: #39a;
+  background-color: #313437;
+  z-index: 9;
+}
+
+.articles {
+    background-color: #313437;
+    color: #ccc;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    line-height: 1.5;
+    position: absolute;
+    top: 40px;
+    bottom: 0px;
+    right: 0;
+    left: 177px;
+    overflow-y: auto;
+}
+
+article {
+  padding: 8px;
+  padding-left: 64px;
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+}
+article ::selection {
+  background: rgba(0, 0, 0, 0.25);
+}
+article.active {
+  display: flex;
+}
+article pre {
+  margin: 0;
+  padding: 0;
+}
+article pre,
+article code {
+  font-family: "Fira Code", Consolas, monospace;
+}
+
+.line-box {
+  font-family: "Fira Code", Consolas, monospace;
+  opacity: 0.5;
+  text-align: right;
+  width: 48px;
+  top: 8px;
+  left: 0;
+  position: absolute;
+}
+
+.banana {
+  color: #edba00;
+}
+
+.navy {
+  color: #343b41;
+}
+
+.navy-bg {
+  background-color: #343b41;
+}
+
+.aqua {
+  color: #5da2a9;
+}
+
+.hotpink {
+  color: #cc0032;
+}
+
+.sky {
+  color: #00a8c6;
+}
+
+.scrubs {
+  color: #628c73;
+}
+
+.purple {
+  color: #aa6699;
+}
+
+.cream {
+  color: #f8f6f3;
+}
+
+.comment {
+  color: #646666;
+}
+
+.khaki {
+  color: #cc9;
+}
+
+.alert {
+  color: #c03;
+}
+
+.rust {
+  color: #c80;
+}
+
+.apple {
+  color: #9f3;
+}

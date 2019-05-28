@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<style>
+	// Fira Code with nifty ligatures
+@import url(https://cdn.rawgit.com/tonsky/FiraCode/1.205/distr/fira_code.css);
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+body {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    min-height: 100vh;
+}
+
+section.editor {
+    display: flex;
+    flex: 1;
+    position: relative;
+}
+
+section.footer {
+    background-color: #181a1b;
+    flex: 0;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #333;
+    
+    > div {
+        display: flex;
+        
+        > div {
+            padding: 8px;
+            color: #ccc;
+            font-size: 12px;
+        }
+    }
+    
+    .footer-right > div {
+        margin: 0 12px;
+    }
+}
+
+aside {
+    background-color: #1d1f21;
+    color: #a2a3a5;
+    flex: 0 0 300px;
+    padding: 8px;
+    
+    // open files and folder tree
+    .aside-block {
+        margin-bottom: 24px;
+        overflow-x: hidden;
+    }
+    
+    // titles of sidebar sections
+    label {
+        padding: 2px;
+        text-transform: uppercase;
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    // items
+    .open-file,
+    .sidebar-item {
+        cursor: default;
+        padding: 8px 8px 8px 16px;
+        font-size: 13px;
+        
+        &.p1 {
+            padding-left: 48px;
+        }
+        
+        &.p2 {
+            padding-left: 80px;
+        }
+    }
+    
+    .folder {
+        position: relative;
+        font-weight: bold;
+        
+        &:before {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            margin-top: -4px;
+            margin-left: 4px;
+            content: "";
+            border-width: 4px 0 4px 6px;
+            border-color: transparent transparent transparent #888;
+            border-style: solid;
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0.5;
+        }
+        
+        &.open::before {
+            transform: rotate(90deg);
+        }
+        
+        &.p1:before {
+            left: 32px;
+        }
+        
+        &.p2:before {
+            left: 64px;
+        }
+    }
+    
+    .aside-block:hover {
+        .folder::before {
+            opacity: 1;
+        }
+    }
+    
+    .open-file {
+        padding-left: 0;
+        cursor: pointer;
+        
+        span {
+            opacity: 0.6;
+        }
+        
+        &:hover {
+            color: #fff;
+        }
+        
+        &.active {
+            color: #ca0;
+            opacity: 1;
+            
+            &:hover {
+                color: #db4;
+            }
+        }
+    }
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+// file tabs
+menu.tabs {
+    background-color: #1d1f21;
+    padding: 2px 0 0;
+    margin: 0;
+    flex: 0 0 auto;
+    display: flex;
+    font-size: 12px;
+    
+    a {
+        padding: 6px 32px 12px;
+        color: #aaa;
+        opacity: 1;
+        text-decoration: none;
+        border-top: 4px solid transparent;
+        background-color: rgba(255, 255, 255, 0.1);
+        background-color: #292c2e;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        min-width: 150px;
+        cursor: default;
+        clip-path: polygon(
+            10% 0, 
+            90% 0%, 
+            100% 100%, 
+            0 100%
+        );
+        margin-right: -10px;
+        
+        span {
+            font-weight: bold;
+            padding-left: 12px;
+        }
+        
+        &:hover {
+            color: #fff;
+        }
+    }
+    
+    a.active {
+        opacity: 1;
+        border-top-color: #39a;
+        background-color: #313437;
+        z-index: 9;
+    }
+}
+
+// wrapper around open editors
+.articles {
+    background-color: #313437;
+    color: #ccc;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    line-height: 1.5;
+    position: absolute;
+    top: 40px;
+    bottom: 0px;
+    right: 0;
+    left: 300px;
+    overflow-y: auto;
+}
+
+// file contents
+article {
+    padding: 8px;
+    padding-left: 64px;
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+    
+    ::selection {
+        background: rgba(0, 0, 0, 0.25);
+    }
+    
+    &.active {
+        display: flex;
+    }
+    
+    pre {
+        margin: 0;
+        padding: 0;
+    }
+
+    pre,
+    code {
+        font-family: "Fira Code", Consolas, monospace;
+    }
+}
+
+// line numbers column
+.line-box {
+    font-family: "Fira Code", Consolas, monospace;
+    opacity: 0.5;
+    text-align: right;
+    width: 48px;
+    top: 8px;
+    left: 0;
+    position: absolute;
+}
+
+//
+// Scheme colors
+//
+
+.banana {
+    color: #edba00;
+}
+
+.navy {
+    color: #343b41;
+}
+
+.navy-bg {
+    background-color: #343b41;
+}
+
+.aqua {
+    color: #5da2a9;
+}
+
+.hotpink {
+     color: #cc0032;
+}
+
+.sky {
+    color: #00a8c6;
+} 
+
+.scrubs {
+    color: #628c73;
+}
+
+.purple {
+    color: #aa6699;
+}
+
+.cream {
+    color: #f8f6f3;
+}
+
+.comment {
+    color: #646666;
+}
+
+.khaki {
+    color: #cc9;
+}
+
+.alert {
+    color: #c03;
+}
+
+.rust {
+    color: #c80;
+}
+
+.apple {
+    color: #9f3;
+}
+
+</style>
+<body>
+	<section class="editor">
+    <aside>
+        <div class="aside-block">
+            <label for="">Open files</label>
+    
+            <div data-target="#readme" class="open-file active"><span>&times;</span> README.md</div>
+            <div data-target="#php" class="open-file"><span>&times;</span> Injector.php</div>
+            <div data-target="#js" class="open-file"><span>&times;</span> guard.js</div>
+            <div data-target="#less" class="open-file"><span>&times;</span> app.less</div>
+            <div data-target="#adaptive" class="open-file"><span>&times;</span> Adaptive.sublime-theme</div>
+        </div>
+        
+        <div class="aside-block">
+            <label for="">Folders</label>
+    
+            <div class="sidebar-item folder open p0">db</div>
+            <div class="sidebar-item folder open p1">src</div>
+            <div class="sidebar-item folder p2">exceptions</div>
+            <div class="sidebar-item file p2">Database.php</div>
+            <div class="sidebar-item file p2">Query.php</div>
+            <div class="sidebar-item folder p1">tests</div>
+            <div class="sidebar-item folder p1">vendor</div>
+            <div class="sidebar-item file p1">composer.json</div>
+            <div class="sidebar-item file p1">phpunit.xml</div>
+        </div>
+    </aside>
+    
+    <main>
+        <menu class="tabs">
+            <a class="active" href="#" data-target="#readme" class="tab">README.md<span>&times;</span></a>
+            <a href="#" data-target="#php" class="tab">Injector.php<span>&times;</span></a>
+            <a href="#" data-target="#js" class="tab">guard.js<span>&times;</span></a>
+            <a href="#" data-target="#less" class="tab">app.less<span>&times;</span></a>
+            <a href="#" data-target="#adaptive" class="tab">Adaptive.sublime-theme<span>&times;</span></a>
+        </menu>
+        
+        <div class="articles">
+            <article id="readme" class="active">
+    <pre class="markdown"><code class="sky"># Batman syntax highlighting scheme for Sublime Text</code>
+
+<code class="scrubs">&gt; A Sublime Text 3 color scheme inspired by the World's Greatest Detective.</code>
+
+To use it, clone this repository into the packages/user subdirectory of your
+Sublime Text installation or simply put the <code class="hotpink">`Batman.tmTheme`</code> file in there.
+
+<code class="banana">![</code><code class="aqua">Preview</code><code class="banana">](https://raw.githubusercontent.com/ifcanduela/sublime-batman-syntax/master/screenshot.png)</code>
+
+Check <code class="banana">[</code><code class="aqua">atom.io</code><code class="banana">](https://atom.io/themes/batman-syntax)</code> for the Atom version.</pre>
+            </article>
+            
+            <article id="php">
+    <pre class="php"><code><code class="hotpink navy-bg">&lt;?php</code>
+
+<code class="purple">namespace</code> pew\lib;
+
+<code class="purple">class</code> <code class="cream">KeyNotFoundException</code> <code class="scrubs">extends</code> \<code class="cream">Exception</code> {}
+
+<code class="purple">class</code> <code class="cream">Injector</code>
+{
+    <code class="comment">/** <code class="khaki">@var</code> array */</code>
+    <code class="scrubs">protected</code> <code class="banana">$containers</code> = [];
+
+    <code class="comment">/**
+     * Create an injector.
+     *
+     * <code class="khaki">@param</code> array $containers One or more arrays or array-like objects.
+     */</code>
+    <code class="scrubs">public</code> <code class="purple">function</code> __construct(...<code class="banana">$containers</code>)
+    {
+        <code class="banana">$this</code>-><code class="banana">containers</code> = <code class="banana">$containers</code>;
+    }
+
+    <code class="comment">/**
+     * Add a value container to the end of the list.
+     *
+     * <code class="khaki">@param</code> array $container An array or array-like object
+     * <code class="khaki">@return</code> self
+     */</code>
+    <code class="scrubs">public</code> <code class="purple">function</code> appendContainer(<code class="banana">$container</code>)
+    {
+        <code class="cream">array_push</code>(<code class="banana">$this</code>-><code class="banana">containers</code>, <code class="banana">$container</code>);
+
+        <code class="purple">return</code> <code class="banana">$this</code>;
+    }
+
+    <code class="scrubs">public</code> <code class="purple">function</code> get()
+    {
+        <code class="alert">throw</code> <code class="purple">new</code> \<code class="cream">Exception</code>(<code class="aqua">"Not yet implemented"</code>);
+    }
+}
+    </code></pre>
+            </article>
+            
+            <article id="js"><pre><code class="scrubs">export</code> <code class="scrubs">default</code> <code class="purple">function</code> <code class="cream">guard</code>(<code class="banana">bodyClass</code>, <code class="banana">callback</code>) {
+    <code class="scrubs">if</code> (document.<code class="cream">querySelector</code>(<code class="aqua">"body"</code>).<code class="banana">classList</code>.<code class="cream">contains</code>(<code class="banana">bodyClass</code>)) {
+        <code class="cream">callback</code>();
+    }
+}
+
+</pre></article>
+            
+            <article id="less"><pre><code class="khaki">@import</code> (css) <code class="cream">url</code>(<code class="aqua">'https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,700,700i,900,900i'</code>);
+
+<code class="scrubs">*</code>,
+<code class="scrubs">*</code>:<code class="apple">before</code>,
+<code class="scrubs">*</code>:<code class="apple">after</code> {
+    <code class="cream">box-sizing:</code> <code class="khaki">inherit</code>;
+}
+
+<code class="scrubs">body</code> {
+    <code class="cream">box-sizing</code>: <code class="khaki">border-box</code>;
+    <code class="cream">min-height</code>: <code class="aqua">100</code><code class="purple">vh</code>;
+}
+
+<code class="purple">.entry</code> {
+    <code class="cream">display</code>: <code class="khaki">flex</code>;
+    <code class="cream">justify-content</code>: <code class="khaki">space-between</code>;
+    <code class="cream">margin</code>: <code class="aqua">10</code><code class="purple">px</code> <code class="khaki">auto</code>;
+    <code class="cream">padding</code>: <code class="aqua">0</code> <code class="aqua">15</code><code class="purple">px</code>;
+
+    <code class="banana">&</code><code class="purple">.winner</code> {
+        <code class="cream">border-color</code>: <code class="aqua">#f09</code>;
+    }
+}
+
+</pre></article>
+            
+            <article id="adaptive"><pre>[
+    <code class="comment">// 
+    // general size and spacing
+    //</code>
+    
+    {
+        <code class="rust">"class</code>": <code class="aqua">"sidebar_tree"</code>,
+        <code class="rust">"row_padding</code>": [<code class="khaki">16</code>, <code class="khaki">8</code>, <code class="khaki">16</code>, <code class="khaki">8</code>],
+        <code class="rust">"indent_offset</code>": <code class="khaki">16</code>
+    },
+
+    <code class="comment">// 
+    // folder tree text labels
+    // </code>
+    
+    { <code class="comment">// make the text color dim</code>
+        <code class="rust">"class</code>": <code class="aqua">"sidebar_label"</code>,
+        <code class="rust">"parents"</code>: [{<code class="rust">"class</code>": <code class="aqua">"tree_row"</code>}],
+        <code class="rust">"color</code>": [<code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">100</code>],
+        <code class="rust">"font.bold"</code> : <code class="khaki">true</code>,
+        <code class="rust">"font.size"</code> : <code class="khaki">11</code>
+    },
+    { <code class="comment">// make the text color of a selected file yellow</code>
+        <code class="rust">"class"</code>: <code class="aqua">"sidebar_label"</code>,
+        <code class="rust">"parents"</code>: [{<code class="rust">"class"</code>: <code class="aqua">"tree_row"</code>, <code class="rust">"attributes"</code>: [<code class="aqua">"selected"</code>]}],
+        <code class="rust">"color"</code>: [<code class="khaki">237</code>, <code class="khaki">186</code>, <code class="khaki">28</code>]
+    },
+    { <code class="comment">// make the text color of a hovered file white</code>
+        <code class="rust">"class"</code>: <code class="aqua">"sidebar_label"</code>,
+        <code class="rust">"parents"</code>: [{<code class="rust">"class"</code>: <code class="aqua">"tree_row"</code>, <code class="rust">"attributes"</code>: [<code class="aqua">"hover"</code>]}],
+        <code class="rust">"color"</code>: [<code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">255</code>]
+    },
+    { <code class="comment">// make the text color of a hovered selected file light yellow</code>
+        <code class="rust">"class"</code>: <code class="aqua">"sidebar_label"</code>,
+        <code class="rust">"parents"</code>: [{<code class="rust">"class"</code>: <code class="aqua">"tree_row"</code>, <code class="rust">"attributes"</code>: [<code class="aqua">"hover"</code>, <code class="aqua">"selected"</code>]}],
+        <code class="rust">"color"</code>: [<code class="khaki">247</code>, <code class="khaki">206</code>, <code class="khaki">58</code>]
+    },
+
+    <code class="comment">// 
+    // folder tree lines
+    // </code>
+
+    { <code class="comment">// hover effect</code>
+        <code class="rust">"class"</code>: <code class="aqua">"tree_row"</code>,
+        <code class="rust">"attributes"</code>: [<code class="aqua">"selectable"</code>, <code class="aqua">"hover"</code>],
+        <code class="rust">"layer0.tint"</code>: [<code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">255</code>, 0.<code class="khaki">06</code>],
+         <code class="comment">// make the background transparent</code>
+        <code class="rust">"layer0.opacity"</code>: <code class="khaki">0.0</code>,
+    },
+    { <code class="comment">// selected items</code>
+        <code class="rust">"class"</code>: <code class="aqua">"tree_row"</code>,
+        <code class="rust">"attributes"</code>: [<code class="aqua">"selected"</code>],
+        <code class="rust">"layer0.tint"</code>: [<code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">0.18</code>],
+        <code class="comment">// make the background transparent</code>
+        <code class="rust">"layer0.opacity"</code>: <code class="khaki">0.0</code>,
+    },
+    { <code class="comment">// selected hover effect</code>
+        <code class="rust">"class"</code>: <code class="aqua">"tree_row"</code>,
+        <code class="rust">"attributes"</code>: [<code class="aqua">"selected"</code>, <code class="aqua">"hover"</code>],
+        <code class="rust">"layer0.tint"</code>: [<code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">255</code>, <code class="khaki">0.18</code>],
+        <code class="rust">"layer0.opacity"</code>: <code class="khaki">0.0</code>,
+    },
+]
+            
+</pre></article>
+        </div>
+    </main>
+</section>
+
+<section class="footer">
+    <div class="footer-left">
+        <div>Line 1, Column 5</div>
+    </div>
+    
+    <div class="footer-right">
+        <div>UTF-8</div>
+        <div>Windows</div>
+        <div>Spaces: 4</div>
+        <div id="syntax">Markdown</div>
+    </div>
+</section>
+
+	
+</body>
+<script>
+const tabs = document.querySelectorAll(".tabs a");
+const openFiles = document.querySelectorAll(".open-file");
+const articles = document.querySelectorAll("article");
+const syntax = document.querySelector("#syntax");
+const lineLengths = {};
+
+function switchTab(e) {
+    const t = e.currentTarget;
+    const id = t.dataset.target;
+    const active = document.querySelectorAll(`[data-target="${id}"]`);
+    const tabPanel = document.querySelector(id);
+    
+    const syntaxName = {
+        "#readme": "Markdown",
+        "#php": "PHP",
+        "#js": "JavaScript",
+        "#less": "LessCSS",
+        "#adaptive": "JSON",
+    }[id];
+    
+    syntax.innerHTML = syntaxName;
+    
+    tabs.forEach(t => t.classList.remove("active"));
+    openFiles.forEach(t => t.classList.remove("active"));
+    articles.forEach(t => t.classList.remove("active"));
+    
+    active.forEach(el => el.classList.add("active"));
+    tabPanel.classList.add("active");
+    
+    setupLineNumbers(id, tabPanel);
+}
+
+function setupLineNumbers(id, tabPanel) {
+    let lineBox = document.querySelector(`${id} .line-box`);
+    
+    if (lineBox === null) {
+        let n = id.substring(1);
+        lineBox = document.createElement("div");
+        lineBox.className = "line-box";
+
+        for (let i = 0; i < lineLengths[n]; i++) {
+            const line = document.createElement("div");
+
+            line.textContent = i + 1;
+            lineBox.appendChild(line);
+        }
+        
+        tabPanel.appendChild(lineBox);
+    }
+}
+
+tabs.forEach(t => t.addEventListener("click", switchTab));
+openFiles.forEach(t => t.addEventListener("click", switchTab));
+
+articles.forEach(a => {
+    lineLengths[a.id] = a.innerHTML.split("\n").length - 1;
+});
+
+switchTab({currentTarget: document.querySelector('[data-target="#readme"]')});
+</script>
+</html>
